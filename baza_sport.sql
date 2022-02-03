@@ -1532,7 +1532,7 @@ $$ LANGUAGE plpgsql;
 -- SELECT znajdz_sportowca(1);
 
 
--- trigger na zmiane druzyny przez gracza. Dane o tranferach sa podane w odpowiedniej tabeli (Transfery). Trzeba podac id nowej druzyny.
+-- trigger na zmiane druzyny przez gracza. Dane o tranferach sa podane w odpowiedniej tabeli (Transfery).
 
 CREATE TABLE Transfery(
 id_transferu_t INT NOT NULL,
@@ -1544,8 +1544,8 @@ nowa_druzyna INT
 );
 
 CREATE SEQUENCE id_transferu_s
-INCREMENT 1
-START 1;
+	INCREMENT 1
+		START 1;
 
 
 CREATE OR REPLACE FUNCTION transfer()
@@ -1553,7 +1553,7 @@ RETURNS TRIGGER
 AS
 $$
 BEGIN 
-	IF NEW.druzyna<>OLD.druzyna THEN -- jezeli przez przypadek wpisze sie id tej samej druzyny to nic sie nie stanie 
+	IF NEW.druzyna<>OLD.druzyna THEN
 		INSERT INTO Transfery
 			VALUES (nextval('id_transferu_s'), old.id_sportowca, old.imie, old.nazwisko, old.druzyna, new.druzyna);
 	END IF;
@@ -1562,9 +1562,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER transfer_gracza
-AFTER UPDATE
-ON Sportowcy
-FOR EACH ROW
+	AFTER UPDATE
+		ON Sportowcy
+	FOR EACH ROW
 EXECUTE PROCEDURE transfer();
 
 -- przyklad 
@@ -1574,3 +1574,5 @@ EXECUTE PROCEDURE transfer();
 -- SELECT znajdz_sportowca(1);
 -- SELECT * FROM Transfery;
 
+CREATE INDEX imie_nazwisko_index
+ON Sportowcy (imie, nazwisko);
