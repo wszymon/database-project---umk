@@ -6,6 +6,11 @@ liczba_graczy Integer Not Null,
 reguly Varchar(500)
 );
 --2
+CREATE TABLE Druzyny (
+id_druzyny Integer Primary Key Not Null,
+nazwa Varchar(100) Not Null
+);
+--3
 CREATE TABLE Sportowcy (
 id_sportowca Integer Primary Key Not Null,
 imie Varchar(100) Not Null,
@@ -16,16 +21,11 @@ wiek_rozpoczecia Integer,
 lata_treningu Integer,
 druzyna Integer References Druzyny(id_druzyny)
 );
---3
+--4
 CREATE TABLE Wyposazenie (
 id_sprzetu Integer Primary Key Not Null,
 nazwa Varchar(100) Not Null,
 sport Integer References Dyscypliny_sportowe(id_sportu)
-);
---4
-CREATE TABLE Druzyny (
-id_druzyny Integer Primary Key Not Null,
-nazwa Varchar(100) Not Null
 );
 --5
 CREATE TABLE Turnieje (
@@ -46,8 +46,19 @@ INSERT INTO Dyscypliny_sportowe (id_sportu,nazwa,liczba_graczy,reguly)
 INSERT INTO Dyscypliny_sportowe (id_sportu,nazwa,liczba_graczy,reguly)
 	VALUES (3,'Koszykowka',10,'Dwie piecioosobowe druzyny probuja zdobyc punkty poprzez trafienie pilka do kosza. Wygrywa druzyna, ktora po
 	czterech kwartach zdobedzie wiecej punktow.');
-
 --2
+insert into Druzyny (id_druzyny, nazwa) values (1, 'The Lucky Mambas');
+insert into Druzyny (id_druzyny, nazwa) values (2, 'The Haunting Panthers');
+insert into Druzyny (id_druzyny, nazwa) values (3, 'The Dinos');
+insert into Druzyny (id_druzyny, nazwa) values (4, 'The Chimps');
+insert into Druzyny (id_druzyny, nazwa) values (5, 'The Royal Toads');
+insert into Druzyny (id_druzyny, nazwa) values (6, 'The Happy');
+insert into Druzyny (id_druzyny, nazwa) values (7, 'The Iron Marines');
+insert into Druzyny (id_druzyny, nazwa) values (8, 'The Silver Octopi');
+insert into Druzyny (id_druzyny, nazwa) values (9, 'The Wild');
+insert into Druzyny (id_druzyny, nazwa) values (10, 'The Big Dingos');
+
+--3
 insert into Sportowcy (id_sportowca, imie, nazwisko, wiek, sport, wiek_rozpoczecia, lata_treningu, druzyna) values (1, 'Laurene', 'Jentle', 27, 2, 16, 11, 5);
 insert into Sportowcy (id_sportowca, imie, nazwisko, wiek, sport, wiek_rozpoczecia, lata_treningu, druzyna) values (2, 'Thom', 'Crudgington', 18, 3, 15, 3, 7);
 insert into Sportowcy (id_sportowca, imie, nazwisko, wiek, sport, wiek_rozpoczecia, lata_treningu, druzyna) values (3, 'Suzanna', 'Beasley', 30, 3, 10, 20, 3);
@@ -1050,7 +1061,7 @@ insert into Sportowcy (id_sportowca, imie, nazwisko, wiek, sport, wiek_rozpoczec
 insert into Sportowcy (id_sportowca, imie, nazwisko, wiek, sport, wiek_rozpoczecia, lata_treningu, druzyna) values (1000, 'Tilly', 'Stode', 44, 1, 11, 33, 3);
 
 	
---3
+--4
 CREATE SEQUENCE id_wyposazenia
 INCREMENT 1
 START 1;
@@ -1071,19 +1082,6 @@ VALUES
 	(nextval('id_wyposazenia'), 'stroj', 3),
 	(nextval('id_wyposazenia'), 'buty', 3);
 	
---4
-
-insert into Druzyny (id_druzyny, nazwa) values (1, 'The Lucky Mambas');
-insert into Druzyny (id_druzyny, nazwa) values (2, 'The Haunting Panthers');
-insert into Druzyny (id_druzyny, nazwa) values (3, 'The Dinos');
-insert into Druzyny (id_druzyny, nazwa) values (4, 'The Chimps');
-insert into Druzyny (id_druzyny, nazwa) values (5, 'The Royal Toads');
-insert into Druzyny (id_druzyny, nazwa) values (6, 'The Happy');
-insert into Druzyny (id_druzyny, nazwa) values (7, 'The Iron Marines');
-insert into Druzyny (id_druzyny, nazwa) values (8, 'The Silver Octopi');
-insert into Druzyny (id_druzyny, nazwa) values (9, 'The Wild');
-insert into Druzyny (id_druzyny, nazwa) values (10, 'The Big Dingos');
-
 --5
 insert into Turnieje (id_turnieju, sport, data_turnieju, miejscowosc, zwyciezca) values (1, 3, '13/09/2017', 'Aborlan', 5);
 insert into Turnieje (id_turnieju, sport, data_turnieju, miejscowosc, zwyciezca) values (2, 2, '10/06/2017', 'Kérkyra', 10);
@@ -1486,7 +1484,7 @@ insert into Turnieje (id_turnieju, sport, data_turnieju, miejscowosc, zwyciezca)
 insert into Turnieje (id_turnieju, sport, data_turnieju, miejscowosc, zwyciezca) values (399, 2, '29/12/2016', 'Jdaidet el Matn', 8);
 insert into Turnieje (id_turnieju, sport, data_turnieju, miejscowosc, zwyciezca) values (400, 1, '26/01/2022', 'Borås', 9);
 
-
+--funkcja, ktora po podaniu numeru id pokazuje imie i nazwisko sportowca, jego wiek, sport ktory uprawia oraz druzyne, w ktorej gra.
 CREATE OR REPLACE FUNCTION znajdz_sportowca(id int)
 RETURNS record
 AS
@@ -1529,3 +1527,50 @@ BEGIN
 	
 END
 $$ LANGUAGE plpgsql;
+
+-- przyklad 
+-- SELECT znajdz_sportowca(1);
+
+
+-- trigger na zmiane druzyny przez gracza. Dane o tranferach sa podane w odpowiedniej tabeli (Transfery). Trzeba podac id nowej druzyny.
+
+CREATE TABLE Transfery(
+id_transferu_t INT NOT NULL,
+id_sportowca_t INT,
+imie_t Varchar (100),
+nazwisko_t Varchar (100),
+dawna_druzyna INT,
+nowa_druzyna INT
+);
+
+CREATE SEQUENCE id_transferu_s
+INCREMENT 1
+START 1;
+
+
+CREATE OR REPLACE FUNCTION transfer()
+RETURNS TRIGGER 
+AS
+$$
+BEGIN 
+	IF NEW.druzyna<>OLD.druzyna THEN -- jezeli przez przypadek wpisze sie id tej samej druzyny to nic sie nie stanie 
+		INSERT INTO Transfery
+			VALUES (nextval('id_transferu_s'), old.id_sportowca, old.imie, old.nazwisko, old.druzyna, new.druzyna);
+	END IF;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER transfer_gracza
+AFTER UPDATE
+ON Sportowcy
+FOR EACH ROW
+EXECUTE PROCEDURE transfer();
+
+-- przyklad 
+-- SELECT * FROM Transfery;
+-- SELECT znajdz_sportowca(1);
+-- UPDATE Sportowcy SET druzyna = 2 WHERE id_sportowca = 1;
+-- SELECT znajdz_sportowca(1);
+-- SELECT * FROM Transfery;
+
